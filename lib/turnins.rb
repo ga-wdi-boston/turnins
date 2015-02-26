@@ -1,23 +1,45 @@
 require 'octokit'
+require 'pry'
 
 class Turnins
+  BASE_ACCOUNT = 'ga-wdi-boston'
+  STUDENT_ACCOUNTS = %w{MaxBlaushild
+                        kbondanza
+                        annie-b
+                        asbren13
+                        lady3bean
+                        abroccoli
+                        RDegnen
+                        idelairre
+                        Katyf
+                        jcyeathatsme
+                        brandonkoo
+                        caitlynl22
+                        HelixPenguin
+                        jrutledg
+                        goodeats
+                        cgpacifico
+                        npupillo
+                        dstop75
+                        LookOut800
+                        hthi
+                        catiffles
+                        tys1019
+                        villanagi89
+                        J-Weeks
+                        kevin2098 }
   def initialize
-    base_repo = ARGV[0]
-
-    if base_repo.nil?
+    if ARGV[0].nil?
       abort("Usage: turnins REPONAME")
     end
 
-    repo_name = base_repo.split('/')[1]
-    pull_requests = Octokit.pull_requests base_repo, state: 'open'
-    `mkdir #{repo_name}`
+    base_repo = BASE_ACCOUNT + '/' + ARGV[0]
 
-    pull_requests.each do |pull_request|
-      pull_user = pull_request[:user][:login]
-      `mkdir #{repo_name}/#{pull_user}`
-      pr_url = pull_request[:head][:repo][:git_url]
-      puts "git clone #{pr_url} #{repo_name}/#{pull_user}"
-      `git clone #{pr_url} #{repo_name}/#{pull_user}`
-    end
+    open_prs = Octokit.pull_requests base_repo, state: 'open'
+    closed_prs = Octokit.pull_requests base_repo, state: 'closed'
+    pull_requests = open_prs + closed_prs
+    who_turned_in = pull_requests.map {|pr| pr[:user][:login] }
+
+    puts STUDENT_ACCOUNTS - who_turned_in
   end
 end
